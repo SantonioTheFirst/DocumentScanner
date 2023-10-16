@@ -108,7 +108,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = Tr
     transformedImg: np.ndarray = transform(img, pts1, pts2)
     if verbose:
         images = [
-            resizedImg,
+           # resizedImg,
             grayImg, 
             blurredImg, 
             CannyImg, 
@@ -118,7 +118,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = Tr
             transformedImg
         ]
         captions = [
-            'Original resized image', 
+           # 'Original resized image', 
             'Gray image', 
             'Blurred image', 
             'Canny filter', 
