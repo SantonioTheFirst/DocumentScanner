@@ -105,9 +105,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     topContours: dict[str, np.ndarray] = topContours[0]
     try:
         pts1: np.ndarray = reorder(list(topContours.values()))[0]
-    except:
-        st.info('Cannot process this image, change your thresholds.')
-        pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+        pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
         transformedImg: np.ndarray = transform(img, pts1, pts2)
         if verbose:
             images = [
@@ -132,6 +130,8 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
             ]
             st.image(images, caption=captions)
         return transformedImg
+    except:
+        st.info('Cannot process this image, change your thresholds.') 
 
     
 '''
