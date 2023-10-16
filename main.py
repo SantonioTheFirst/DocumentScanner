@@ -155,6 +155,6 @@ if file:
     #with cv2.imread(file) as img:
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
     img = cv2.imdecode(file_bytes, 1)
-    get_clipped_img(img, width, height))
+    get_clipped_img(img, width, height)
 #except:
     #st.write('Something went wrong...')
