@@ -102,8 +102,11 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     allContours: tuple[np.ndarray] = allContours[0]
     topContours: tuple[dict[str, np.ndarray], np.ndarray] = get_top_contours(img, allContours)
     imgContours: np.ndarray = topContours[1]
-    topContours: dict[str, np.ndarray] = topContours [0]
-    pts1: np.ndarray = reorder(list(topContours.values()))[0]
+    topContours: dict[str, np.ndarray] = topContours[0]
+    try:
+        pts1: np.ndarray = reorder(list(topContours.values()))[0]
+    except:
+        st.info('Cannot process this image, change your thresholds.')
     pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
     transformedImg: np.ndarray = transform(img, pts1, pts2)
     if verbose:
@@ -143,13 +146,6 @@ file = st.file_uploader('Upload your documents', accept_multiple_files=False)
 if file:
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
     img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
-    get_clipped_img(img, width, height)
-with st.sidebar:
-    if file is None:
-        threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=True)
-        threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=True)
-        st.write('Upload the file first')
-    else:
-        threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
-        threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=False)
-        get_clipped_img(img, width, height, threshold1, threshold2) 
+    threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
+    threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=False)
+    get_clipped_img(img, width, height, threshold1, threshold2)
