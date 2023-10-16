@@ -92,8 +92,8 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     
     
 def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = True) -> np.ndarray:
-    resizedImg: np.ndarray = resize(img, width, height)
-    grayImg: np.ndarray = to_grayscale(resizedImg)
+    #resizedImg: np.ndarray = resize(img, width, height)
+    grayImg: np.ndarray = to_grayscale(img)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg)
     deImg: np.ndarray = dilate_and_erode(CannyImg)
