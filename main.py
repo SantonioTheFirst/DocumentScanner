@@ -9,6 +9,7 @@ st.set_page_config(page_title='Document scanner demo', page_icon=':document:')
 
 width: int = 512
 height: int = 512
+file = None
 
 
 def resize(img: np.ndarray, width: int, height: int) -> np.ndarray:
@@ -131,7 +132,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = Tr
 
 
 with st.sidebar:
-    if file:
+    if file is None:
         disabled: bool = True
         st.write('Upload the file first')
     else:
