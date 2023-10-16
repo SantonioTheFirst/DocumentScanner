@@ -133,12 +133,12 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = Tr
 
 with st.sidebar:
     if file is None:
-        disabled: bool = True
+        threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=True)
+    threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=True)
         st.write('Upload the file first')
     else:
-        disabled: bool = False
-    threshold1: int = st.slider('Threshold 1', 0, 255, 50, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
-    threshold2: int = st.slider('Threshold 2', 0, 255, 100, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
+        threshold1: int = st.slider('Threshold 1', 0, 255, 50, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
+        threshold2: int = st.slider('Threshold 2', 0, 255, 100, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
     
     
 '''
