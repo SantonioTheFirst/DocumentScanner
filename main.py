@@ -107,7 +107,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
         st.warning(reorder(list(topContours.values())))
         pts1: np.ndarray = reorder(list(topContours.values()))[0]
         pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
-        transformedImg: np.ndarray = transform(img, pts1, pts2)
+        transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
         if verbose:
             images = [
            # resizedImg,
@@ -116,8 +116,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
                 CannyImg, 
                 deImg,
                 contoursImg, 
-                imgContours, 
-                transformedImg
+                imgContours
             ]
             captions = [
            # 'Original resized image', 
@@ -130,7 +129,8 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
                 'Clipped and transformed image'
             ]
             st.image(images, caption=captions)
-        return transformedImg
+            st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
+        return transformedImages
     except:
         st.info('Cannot process this image, change your thresholds.') 
 
