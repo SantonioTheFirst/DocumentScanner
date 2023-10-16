@@ -140,15 +140,15 @@ Just upload your image with document below!
 '''
 
 file = st.file_uploader('Upload your documents', accept_multiple_files=False)
+if file:
+    file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
+    img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
+    get_clipped_img(img, width, height)
 with st.sidebar:
     if file is None:
         threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=True)
         threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=True)
         st.write('Upload the file first')
     else:
-        threshold1: int = st.slider('Threshold 1', 0, 255, 50, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
-        threshold2: int = st.slider('Threshold 2', 0, 255, 100, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=disabled)
-if file:
-    file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
-    img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
-    get_clipped_img(img, width, height)
+        threshold1: int = st.slider('Threshold 1', 0, 255, 50, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=False)
+        threshold2: int = st.slider('Threshold 2', 0, 255, 100, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=False)
