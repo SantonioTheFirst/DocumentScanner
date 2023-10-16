@@ -154,7 +154,7 @@ file = st.file_uploader('Upload your documents', accept_multiple_files=False)
 if file:
     #with cv2.imread(file) as img:
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)
+    img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
     get_clipped_img(img, width, height)
 #except:
     #st.write('Something went wrong...')
