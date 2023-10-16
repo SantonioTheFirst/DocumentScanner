@@ -91,11 +91,11 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     return result
     
     
-def get_clipped_img(img: np.ndarray, width: int, height: int, verbose: bool = True) -> np.ndarray:
+def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
     #resizedImg: np.ndarray = resize(img, width, height)
     grayImg: np.ndarray = to_grayscale(img)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
-    CannyImg: np.ndarray = apply_Canny_filter(blurredImg)
+    CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
     deImg: np.ndarray = dilate_and_erode(CannyImg)
     allContours: tuple[tuple[np.ndarray], np.ndarray]  = get_all_contours(img, deImg)
     contoursImg: np.ndarray = allContours[1]
@@ -150,5 +150,6 @@ with st.sidebar:
         threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=True)
         st.write('Upload the file first')
     else:
-        threshold1: int = st.slider('Threshold 1', 0, 255, 50, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=False)
-        threshold2: int = st.slider('Threshold 2', 0, 255, 100, on_change=get_clipped_img, args=(img, threshold1, threshold2), disabled=False)
+        threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
+        threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=False)
+        get_clipped_img(img, width, height, threshold1, threshold2) 
