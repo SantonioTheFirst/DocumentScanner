@@ -104,6 +104,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     imgContours: np.ndarray = topContours[1]
     topContours: dict[str, np.ndarray] = topContours[0]
     try:
+        print(reorder(list(topContours.values())))
         pts1: np.ndarray = reorder(list(topContours.values()))[0]
         pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
         transformedImg: np.ndarray = transform(img, pts1, pts2)
