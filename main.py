@@ -52,12 +52,13 @@ def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[n
     return contours, allContours
     
     
-def get_top_contours(img: np.ndarray, contours: np.ndarray, contour_area_threshold: float = 10000) -> tuple[dict[str, np.ndarray], np.ndarray]:
+def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[dict[str, np.ndarray], np.ndarray]:
     top_contours: dict[str, np.ndarray] = {}
     imgContours: np.ndarray = img.copy()
+    contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 25.0
+    st.info(contour_area_threshold)
     # print(contours.shape)
     for contour in contours:
-        st.info(contour)
         # print(type(contour), contour.shape)
         area: float = cv2.contourArea(contour)
         if area > contour_area_threshold:
