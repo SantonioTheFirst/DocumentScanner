@@ -103,36 +103,36 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     topContours: tuple[dict[str, np.ndarray], np.ndarray] = get_top_contours(img, allContours)
     imgContours: np.ndarray = topContours[1]
     topContours: dict[str, np.ndarray] = topContours[0]
-    try:
-        st.warning(reorder(list(topContours.values())))
-        pts1: np.ndarray = reorder(list(topContours.values()))
-        pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
-        transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
-        if verbose:
-            images = [
+    #try:
+       # st.warning(reorder(list(topContours.values())))
+    pts1: np.ndarray = reorder(list(topContours.values()))
+    pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
+    transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
+    if verbose:
+        images = [
            # resizedImg,
-                grayImg, 
-                blurredImg, 
-                CannyImg, 
-                deImg,
-                contoursImg, 
-                imgContours
-            ]
-            captions = [
+            grayImg, 
+            blurredImg, 
+            CannyImg, 
+            deImg,
+            contoursImg, 
+            imgContours
+        ]
+        captions = [
            # 'Original resized image', 
-                'Gray image', 
-                'Blurred image', 
-                'Canny filter', 
-                'Dilated and eroded image', 
-                'All contours', 
-                'Top contours', 
-                'Clipped and transformed image'
-            ]
-            st.image(images, caption=captions)
-            st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
-        return transformedImages
-    except:
-        st.info('Cannot process this image, change your thresholds.') 
+            'Gray image', 
+            'Blurred image', 
+            'Canny filter', 
+            'Dilated and eroded image', 
+            'All contours', 
+            'Top contours', 
+            'Clipped and transformed image'
+        ]
+        st.image(images, caption=captions)
+        st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
+    return transformedImages
+    #except:
+        #st.info('Cannot process this image, change your thresholds.') 
 
     
 '''
