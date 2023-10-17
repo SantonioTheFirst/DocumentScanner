@@ -126,7 +126,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
             'Dilated and eroded image', 
             'All contours', 
             'Top contours', 
-            'Clipped and transformed image'
+            #'Clipped and transformed image'
         ]
         st.image(images, caption=captions)
         st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
