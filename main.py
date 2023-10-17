@@ -57,7 +57,7 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray, contour_area_thresho
     imgContours: np.ndarray = img.copy()
     # print(contours.shape)
     for contour in contours:
-        st.image(contour)
+        st.info(contour)
         # print(type(contour), contour.shape)
         area: float = cv2.contourArea(contour)
         if area > contour_area_threshold:
