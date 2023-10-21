@@ -100,7 +100,7 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     
     
 def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
-    img border = add_border(img)
+    imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
     grayImg: np.ndarray = to_grayscale(imgBorder)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
