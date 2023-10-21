@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import scipy.spatial.distance
 import cv2
 import time
 
