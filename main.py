@@ -100,9 +100,9 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     
     
 def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
-    imgBorder = add_border(img)
+    #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
-    grayImg: np.ndarray = to_grayscale(imgBorder)
+    grayImg: np.ndarray = to_grayscale(img)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
     deImg: np.ndarray = dilate_and_erode(CannyImg)
@@ -119,7 +119,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
     if verbose:
         images = [
-            imgBorder,
+            #imgBorder,
             grayImg, 
             blurredImg, 
             CannyImg, 
@@ -128,7 +128,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
             imgContours
         ]
         captions = [
-            'Original image with border', 
+            #'Original image with border', 
             'Gray image', 
             'Blurred image', 
             'Canny filter', 
