@@ -7,8 +7,8 @@ import time
 st.set_page_config(page_title='Document scanner demo', page_icon=':document:')
 
 
-#width: int = 512
-#height: int = 512
+width: int = 512
+height: int = 512
 file = None
 
 def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.ndarray:
@@ -92,7 +92,74 @@ def reorder(myPoints: list) -> np.ndarray:
         result.append(pointsNew)
     return np.array(result, dtype=np.float32)
     
-    
+
+def calc_points(img, pts1):
+    #image center
+    u0 = (img.shape[1]) / 2.0
+    v0 = (img.shape[0]) / 2.0
+
+    #detected corners on the original image
+
+    #widths and heights of the projected image
+    w1 = scipy.spatial.distance.euclidean(pts1[0], pts1[1])
+    w2 = scipy.spatial.distance.euclidean(pts1[2], pts1[3])
+
+    h1 = scipy.spatial.distance.euclidean(pts1[0], pts1[2])
+    h2 = scipy.spatial.distance.euclidean(pts1[1], pts1[3])
+
+    w = max(w1, w2)
+    h = max(h1, h2)
+
+    #visible aspect ratio
+    ar_vis = float(w) / float(h)
+
+    #make numpy arrays and append 1 for linear algebra
+    m1 = np.array((pts1[0][0], pts1[0][1], 1)).astype('float32')
+    m2 = np.array((pts1[1][0], pts1[1][1], 1)).astype('float32')
+    m3 = np.array((pts1[2][0], pts1[2][1], 1)).astype('float32')
+    m4 = np.array((pts1[3][0], pts1[3][1], 1)).astype('float32')
+
+    #calculate the focal disrance
+    k2 = np.dot(np.cross(m1, m4), m3) / np.dot(np.cross(m2, m4), m3)
+    k3 = np.dot(np.cross(m1, m4), m2) / np.dot(np.cross(m3, m4), m2)
+
+    n2 = k2 * m2 - m1
+    n3 = k3 * m3 - m1
+
+    n21 = n2[0]
+    n22 = n2[1]
+    n23 = n2[2]
+
+    n31 = n3[0]
+    n32 = n3[1]
+    n33 = n3[2]
+
+    f = np.sqrt(np.abs((1.0 / (n23 * n33)) * ((n21 * n31 - (n21 * n33 + n23 * n31) * u0 + n23 * n33 * u0 * u0) + (n22 * n32 - (n22 * n33 + n23 * n32) * v0 + n23 * n33 * v0 * v0))))
+
+    A = np.array([[f, 0, u0], [0, f, v0], [0, 0, 1]]).astype('float32')
+    At = np.transpose(A)
+    Ati = np.linalg.inv(At)
+    Ai = np.linalg.inv(A)
+
+    #calculate the real aspect ratio
+    ar_real = mp.sqrt(np.dot(np.dot(np.dot(n2, Ati), Ai), n2) / np.dot(np.dot(np.dot(n3, Ati), Ai), n3))
+
+    if ar_real < ar_vis:
+        W = int(w)
+        H = int(W / ar_real)
+    else:
+        H = int(h)
+        W = int(ar_real * H)
+    pts1 = np.float32(pts1)
+    pts2 = np.float32([[0,0],[W,0],[0,H],[W,H]])
+
+    #project the image with the new w/h
+    M = cv2.getPerspectiveTransform(pts1, pts2)
+
+    dst = cv2.warpPerspective(img, M, (W, H))
+    return dst
+
+
 def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray:
     matrix: np.ndarray = cv2.getPerspectiveTransform(pts1, pts2)
     result: np.ndarray = cv2.warpPerspective(img, matrix, (width, height))
@@ -115,7 +182,9 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     #try:
        # st.warning(reorder(list(topContours.values())))
     pts1: np.ndarray = reorder(topContours)
-    pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
+    pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+    dst = calc_points(img, pts1)
+    st.image(dst)
     transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
     if verbose:
         images = [
