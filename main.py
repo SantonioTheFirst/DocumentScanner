@@ -11,6 +11,11 @@ width: int = 512
 height: int = 512
 file = None
 
+def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.ndarray:
+    border = [border_size for i in range(4)]
+    value = [value for i in range(3)]
+    return cv2.copyMakeBorder(img, *border, cv2.BORDER_CONSTANT, value=value)
+
 
 def resize(img: np.ndarray, width: int, height: int) -> np.ndarray:
     img: np.ndarray = cv2.resize(img, (width, height))
@@ -27,7 +32,7 @@ def add_gaussian_blur(img: np.ndarray) -> np.ndarray:
     return img
     
     
-def apply_Canny_filter(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, aperture_size: int = 3) -> np.ndarray:
+def apply_Canny_filter(img: np.ndarray, threshold1: int = 50, threshold2: int = 255, aperture_size: int = 3) -> np.ndarray:
     img: np.ndarray = cv2.Canny(
         image=img,
         threshold1=threshold1,
@@ -52,8 +57,8 @@ def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[n
     return contours, allContours
     
     
-def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[dict[str, np.ndarray], np.ndarray]:
-    top_contours: dict[str, np.ndarray] = {}
+def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    top_contours: list[np.ndarray] = []
     imgContours: np.ndarray = img.copy()
     contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 25.0
     st.info(contour_area_threshold)
@@ -63,11 +68,12 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[dict[str, n
         area: float = cv2.contourArea(contour)
         if area > contour_area_threshold:
             peri = cv2.arcLength(contour, True)
-            approx: np.ndarray = cv2.approxPolyDP(contour, 0.02 * peri, True)
+            approx: np.ndarray = cv2.approxPolyDP(contour, 0.01 * peri, True)
             # print(len(approx))
-            if len(approx) in set([4, 5]):
-                top_contours[f'{area}_{len(approx)}'] = approx
-    imgContours: np.ndarray = cv2.drawContours(imgContours, list(top_contours.values()), -1, (0, 255, 0), 20)
+            if len(approx) in set([4, 5, 6, 7]):
+                top_contours.append(approx)
+    top_contours = np.array(top_contours)
+    imgContours: np.ndarray = cv2.drawContours(imgContours, top_contours, -1, (0, 255, 0), 10)
     return top_contours, imgContours
     
     
@@ -94,25 +100,26 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     
     
 def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
+    img border = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
-    grayImg: np.ndarray = to_grayscale(img)
+    grayImg: np.ndarray = to_grayscale(imgBorder)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
     deImg: np.ndarray = dilate_and_erode(CannyImg)
     allContours: tuple[tuple[np.ndarray], np.ndarray]  = get_all_contours(img, deImg)
     contoursImg: np.ndarray = allContours[1]
     allContours: tuple[np.ndarray] = allContours[0]
-    topContours: tuple[dict[str, np.ndarray], np.ndarray] = get_top_contours(img, allContours)
+    topContours: tuple[np.ndarray, np.ndarray] = get_top_contours(img, allContours)
     imgContours: np.ndarray = topContours[1]
-    topContours: dict[str, np.ndarray] = topContours[0]
+    topContours: np.ndarray = topContours[0]
     #try:
        # st.warning(reorder(list(topContours.values())))
-    pts1: np.ndarray = reorder(list(topContours.values()))
+    pts1: np.ndarray = reorder(topContours)
     pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]]) 
     transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
     if verbose:
         images = [
-           # resizedImg,
+            imgBorder,
             grayImg, 
             blurredImg, 
             CannyImg, 
@@ -121,7 +128,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
             imgContours
         ]
         captions = [
-           # 'Original resized image', 
+            'Original image with border', 
             'Gray image', 
             'Blurred image', 
             'Canny filter', 
@@ -150,5 +157,5 @@ if file:
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
     img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
-    threshold2: int = st.slider('Threshold 2', 0, 255, 100, disabled=False)
+    threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
     get_clipped_img(img, width, height, threshold1, threshold2)
