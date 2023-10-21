@@ -7,8 +7,8 @@ import time
 st.set_page_config(page_title='Document scanner demo', page_icon=':document:')
 
 
-width: int = 512
-height: int = 512
+#width: int = 512
+#height: int = 512
 file = None
 
 def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.ndarray:
@@ -68,7 +68,7 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[np.ndarray,
         area: float = cv2.contourArea(contour)
         if area > contour_area_threshold:
             peri = cv2.arcLength(contour, True)
-            approx: np.ndarray = cv2.approxPolyDP(contour, 0.01 * peri, True)
+            approx: np.ndarray = cv2.approxPolyDP(contour, 0.02 * peri, True)
             # print(len(approx))
             if len(approx) in set([4, 5, 6, 7]):
                 top_contours.append(approx)
