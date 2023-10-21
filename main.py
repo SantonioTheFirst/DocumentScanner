@@ -186,8 +186,8 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     pts1: np.ndarray = reorder(topContours)
     pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
     st.info(f'{pts1}, {pts1.shape}')
-    dst = calc_points(img, pts1[0])
-    st.image(dst)
+    #dst = calc_points(img, pts1[0])
+    #st.image(dst)
     transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
     if verbose:
         images = [
