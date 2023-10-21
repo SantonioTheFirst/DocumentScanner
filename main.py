@@ -102,9 +102,10 @@ def calc_points(img, pts1):
     #detected corners on the original image
 
     #widths and heights of the projected image
-    w1 = scipy.spatial.distance.euclidean(pts1[0], pts1[1])
+    w1 = scipy.spatial.distance.euclidean(pts1[0][0], pts1[0][1])
     st.info(f'{pts1[0]}, {pts1[1]}, {w1}')
-    w2 = scipy.spatial.distance.euclidean(pts1[2], pts1[3])
+    print(f'{pts1[0]}, {pts1[1]}, {w1}')
+    w2 = scipy.spatial.distance.euclidean(pts1[0][2], pts1[0][3])
 
     h1 = scipy.spatial.distance.euclidean(pts1[0], pts1[2])
     h2 = scipy.spatial.distance.euclidean(pts1[1], pts1[3])
