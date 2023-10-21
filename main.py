@@ -103,6 +103,7 @@ def calc_points(img, pts1):
 
     #widths and heights of the projected image
     w1 = scipy.spatial.distance.euclidean(pts1[0], pts1[1])
+    st.info(pts1[0], pts1[1], w1)
     w2 = scipy.spatial.distance.euclidean(pts1[2], pts1[3])
 
     h1 = scipy.spatial.distance.euclidean(pts1[0], pts1[2])
@@ -184,7 +185,8 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
        # st.warning(reorder(list(topContours.values())))
     pts1: np.ndarray = reorder(topContours)
     pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
-    dst = calc_points(img, pts1)
+    st.info(pts1, pts1.shape)
+    dst = calc_points(img, pts1[0])
     st.image(dst)
     transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
     if verbose:
