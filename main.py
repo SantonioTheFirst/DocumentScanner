@@ -18,6 +18,23 @@ def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.n
     return cv2.copyMakeBorder(img, *border, cv2.BORDER_CONSTANT, value=value)
 
 
+def enhance_contrast(img:np.ndarray) -> np.ndarray:
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l_channel, a, b = cv2.split(lab)
+
+    # Applying CLAHE to L-channel
+    # feel free to try different values for the limit and grid size:
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l_channel)
+
+    # merge the CLAHE enhanced L-channel with the a and b channel
+    limg = cv2.merge((cl,a,b))
+
+    # Converting image from LAB Color model to BGR color spcae
+    enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+    return enhanced_img
+
+
 def resize(img: np.ndarray, width: int, height: int) -> np.ndarray:
     img: np.ndarray = cv2.resize(img, (width, height))
     return img
@@ -94,33 +111,34 @@ def reorder(myPoints: list) -> np.ndarray:
     return np.array(result, dtype=np.float32)
     
 
-def calc_points(img, pts1):
+def transform_with_ratio(img: np.ndarray, pts: np.ndarray) -> np.ndarray:
+    (rows,cols,_) = img.shape
+
     #image center
-    u0 = (img.shape[1]) / 2.0
-    v0 = (img.shape[0]) / 2.0
+    u0 = (cols) / 2.0
+    v0 = (rows) / 2.0
 
     #detected corners on the original image
+    p = np.squeeze(pts)
 
     #widths and heights of the projected image
-    w1 = scipy.spatial.distance.euclidean(pts1[0][0], pts1[0][1])
-    st.info(f'{pts1[0]}, {pts1[1]}, {w1}')
-    print(f'{pts1[0]}, {pts1[1]}, {w1}')
-    w2 = scipy.spatial.distance.euclidean(pts1[0][2], pts1[0][3])
+    w1 = scipy.spatial.distance.euclidean(p[0], p[1])
+    w2 = scipy.spatial.distance.euclidean(p[2], p[3])
 
-    h1 = scipy.spatial.distance.euclidean(pts1[0], pts1[2])
-    h2 = scipy.spatial.distance.euclidean(pts1[1], pts1[3])
+    h1 = scipy.spatial.distance.euclidean(p[0], p[2])
+    h2 = scipy.spatial.distance.euclidean(p[1], p[3])
 
-    w = max(w1, w2)
-    h = max(h1, h2)
+    w = np.max(np.array([w1, w2]))
+    h = np.max(np.array([h1, h2]))
 
     #visible aspect ratio
     ar_vis = float(w) / float(h)
 
     #make numpy arrays and append 1 for linear algebra
-    m1 = np.array((pts1[0][0], pts1[0][1], 1)).astype('float32')
-    m2 = np.array((pts1[1][0], pts1[1][1], 1)).astype('float32')
-    m3 = np.array((pts1[2][0], pts1[2][1], 1)).astype('float32')
-    m4 = np.array((pts1[3][0], pts1[3][1], 1)).astype('float32')
+    m1 = np.array((p[0][0], p[0][1], 1)).astype('float32')
+    m2 = np.array((p[1][0], p[1][1], 1)).astype('float32')
+    m3 = np.array((p[2][0], p[2][1], 1)).astype('float32')
+    m4 = np.array((p[3][0], p[3][1], 1)).astype('float32')
 
     #calculate the focal disrance
     k2 = np.dot(np.cross(m1, m4), m3) / np.dot(np.cross(m2, m4), m3)
@@ -139,13 +157,14 @@ def calc_points(img, pts1):
 
     f = np.sqrt(np.abs((1.0 / (n23 * n33)) * ((n21 * n31 - (n21 * n33 + n23 * n31) * u0 + n23 * n33 * u0 * u0) + (n22 * n32 - (n22 * n33 + n23 * n32) * v0 + n23 * n33 * v0 * v0))))
 
-    A = np.array([[f, 0, u0], [0, f, v0], [0, 0, 1]]).astype('float32')
+    A = np.array([[f, 0, u0], [0, f, v0],[0, 0, 1]]).astype('float32')
+
     At = np.transpose(A)
     Ati = np.linalg.inv(At)
     Ai = np.linalg.inv(A)
 
     #calculate the real aspect ratio
-    ar_real = mp.sqrt(np.dot(np.dot(np.dot(n2, Ati), Ai), n2) / np.dot(np.dot(np.dot(n3, Ati), Ai), n3))
+    ar_real = np.sqrt(np.dot(np.dot(np.dot(n2, Ati), Ai), n2) / np.dot(np.dot(np.dot(n3, Ati), Ai), n3))
 
     if ar_real < ar_vis:
         W = int(w)
@@ -153,8 +172,9 @@ def calc_points(img, pts1):
     else:
         H = int(h)
         W = int(ar_real * H)
-    pts1 = np.float32(pts1)
-    pts2 = np.float32([[0,0],[W,0],[0,H],[W,H]])
+
+    pts1 = np.array(p).astype('float32')
+    pts2 = np.float32([[0, 0], [W, 0], [0, H], [W, H]])
 
     #project the image with the new w/h
     M = cv2.getPerspectiveTransform(pts1, pts2)
@@ -169,10 +189,11 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     return result
     
     
-def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
+def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
     #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
-    grayImg: np.ndarray = to_grayscale(img)
+    enhancedImg = enhance_contrast(img)
+    grayImg: np.ndarray = to_grayscale(enhancedImg)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
     deImg: np.ndarray = dilate_and_erode(CannyImg)
@@ -185,11 +206,7 @@ def get_clipped_img(img: np.ndarray, width: int, height: int, threshold1: int = 
     #try:
        # st.warning(reorder(list(topContours.values())))
     pts1: np.ndarray = reorder(topContours)
-    pts2: np.ndarray = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
-    st.info(f'{pts1}, {pts1.shape}')
-    dst = calc_points(img, pts1[0])
-    st.image(dst)
-    transformedImages: list[np.ndarray] = [transform(img, p, pts2) for p in pts1]
+    transformedImages: list[np.ndarray] = [transform_with_ratio(img, p) for p in pts1]
     if verbose:
         images = [
             #imgBorder,
