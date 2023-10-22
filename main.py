@@ -8,8 +8,6 @@ import time
 st.set_page_config(page_title='Document scanner demo', page_icon=':document:')
 
 
-#width: int = 512
-#height: int = 512
 file = None
 
 def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.ndarray:
@@ -86,14 +84,12 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int
     imgContours: np.ndarray = img.copy()
     contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 30.0
     st.info(contour_area_threshold)
-    # print(contours.shape)
     for contour in contours:
-        # print(type(contour), contour.shape)
         area: float = cv2.contourArea(contour)
         if area > contour_area_threshold:
             peri = cv2.arcLength(contour, True)
             approx: np.ndarray = cv2.approxPolyDP(contour, 0.02 * peri, True)
-            st.info(f'Len: {len(approx)}')
+            #st.info(f'Len: {len(approx)}')
             if len(approx) in num_corners:
                 top_contours.append(approx)
     top_contours = np.array(top_contours)
@@ -219,13 +215,11 @@ def get_clipped_img(
     topContours: tuple[np.ndarray, np.ndarray] = get_top_contours(img, allContours, num_corners)
     imgContours: np.ndarray = topContours[1]
     topContours: np.ndarray = topContours[0]
-    #try:
-       # st.warning(reorder(list(topContours.values())))
     pts1: np.ndarray = reorder(topContours)
     try:
         transformedImages: list[np.ndarray] = [transform_with_ratio(img, p) for p in pts1]
-    except E:
-        st.warning(f'Something is wrong with image transformation function: {E}')
+    except:
+        st.warning(f'Something is wrong with image transformation function')
     if verbose:
         images = [
             img,
@@ -254,9 +248,6 @@ def get_clipped_img(
         return transformedImgs
     except:
         pass
-            #st.warning('')
-    #except:
-        #st.info('Cannot process this image, change your thresholds.') 
 
     
 '''
@@ -280,13 +271,13 @@ num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
 num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
 verbose: bool = st.checkbox('Verbose', True)
 kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
-st.info(num_corners)
+#st.info(num_corners)
 documents: list[np.ndarray] = get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
 
-if documents is not None:
-    st.download_button(
-        'Download images', 
-        data=documents,
-        mime='image/png', 
-        type='primary'
-    )
+#if documents is not None:
+#    st.download_button(
+#        'Download images', 
+#        data=documents,
+#        mime='image/png', 
+#        type='primary'
+#    )
