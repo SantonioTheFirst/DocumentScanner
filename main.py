@@ -189,7 +189,14 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     return result
     
     
-def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, kernel, num_corners: set[int] = set([4]), verbose: bool = True) -> np.ndarray:
+def get_clipped_img(
+    img: np.ndarray,
+    threshold1: int = 50,
+    threshold2: int = 100,
+    kernel: tuple[int, int] = (3, 3),
+    num_corners: set[int] = set([4]),
+    verbose: bool = True
+) -> np.ndarray:
     #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
     enhancedImg = enhance_contrast(img)
