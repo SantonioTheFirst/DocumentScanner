@@ -19,19 +19,19 @@ def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.n
 
 @st.cache_data
 def enhance_contrast(img:np.ndarray) -> np.ndarray:
-    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    lab: np.ndarray = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l_channel, a, b = cv2.split(lab)
 
     # Applying CLAHE to L-channel
     # feel free to try different values for the limit and grid size:
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    cl = clahe.apply(l_channel)
+    clahe: np.ndarray = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl: np.ndarray = clahe.apply(l_channel)
 
     # merge the CLAHE enhanced L-channel with the a and b channel
-    limg = cv2.merge((cl, a, b))
+    limg: np.ndarray = cv2.merge((cl, a, b))
 
     # Converting image from LAB Color model to BGR color spcae
-    enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+    enhanced_img: np.ndarray = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
     return enhanced_img
 
 
@@ -120,14 +120,14 @@ def reorder(myPoints: list) -> np.ndarray:
 
 @st.cache_data
 def transform_with_ratio(img: np.ndarray, pts: np.ndarray) -> np.ndarray:
-    (rows,cols,_) = img.shape
+    rows, cols, _ = img.shape
 
     #image center
-    u0 = (cols) / 2.0
-    v0 = (rows) / 2.0
+    u0: float = (cols) / 2.0
+    v0: float = (rows) / 2.0
 
     #detected corners on the original image
-    p = np.squeeze(pts)
+    p: np.ndarray = np.squeeze(pts)
 
     #widths and heights of the projected image
     w1 = scipy.spatial.distance.euclidean(p[0], p[1])
@@ -268,10 +268,10 @@ Just upload your image with document below!
 
 file = st.file_uploader('Upload your documents', accept_multiple_files=False)
 if file:
-    file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
-    img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
+    file_bytes: np.ndarray = np.asarray(bytearray(file.read()), dtype=np.uint8)
+    img: np.ndarray = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
 else:
-    img = cv2.cvtColor(cv2.imread('Без названия.png'), cv2.COLOR_BGR2RGB)
+    img: np.ndarray = cv2.cvtColor(cv2.imread('Без названия.png'), cv2.COLOR_BGR2RGB)
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
     num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
@@ -280,4 +280,3 @@ else:
     kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
     st.info(num_corners)
     get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
-st.balloons()
