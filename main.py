@@ -255,5 +255,5 @@ if file:
     img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
-    corners_range: set[int] = set(range(*st.slider('Number of corners', 4, 8, (4, 5))))
+    num_corners: set[int] = set(range(*st.slider('Number of corners', 4, 8, (4, 5))))
     get_clipped_img(img, threshold1, threshold2, num_corners)
