@@ -262,7 +262,7 @@ if file:
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
     img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
 else:
-    img = cv2.imread('example.png')
+    img = cv2.imread('Без названия.png')
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
     num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
