@@ -266,6 +266,6 @@ if file:
     num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
     num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
     verbose: bool = st.checkbox('Verbose', True)
-    kernel: np.ndarray = np.ones(eval(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)])))
+    kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
     st.info(num_corners)
     get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
