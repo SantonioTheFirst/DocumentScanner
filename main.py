@@ -251,6 +251,7 @@ def get_clipped_img(
         st.image(images, caption=captions)
     try:
         st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
+        return transformedImgs
     except:
         pass
             #st.warning('')
@@ -272,11 +273,20 @@ if file:
     img: np.ndarray = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
 else:
     img: np.ndarray = cv2.cvtColor(cv2.imread('Без названия.png'), cv2.COLOR_BGR2RGB)
-    threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
-    threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
-    num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
-    num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
-    verbose: bool = st.checkbox('Verbose', True)
-    kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
-    st.info(num_corners)
-    get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
+    
+threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
+threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
+num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
+num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
+verbose: bool = st.checkbox('Verbose', True)
+kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
+st.info(num_corners)
+documents: list[np.ndarray] = get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
+
+if documents is not None:
+    st.download_button(
+        'Download images', 
+        data=documents,
+        mime='image/png', 
+        type='primary'
+    )
