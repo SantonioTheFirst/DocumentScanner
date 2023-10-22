@@ -200,48 +200,47 @@ def get_clipped_img(
     threshold2: int = 100,
     kernel: tuple[int, int] = (3, 3),
     num_corners: set[int] = set([4]),
-    verbose: bool = True
+    verbose: bool = True, 
+    enhance: bool = True
 ) -> np.ndarray:
+    images = [img]
+    captions = ['Original image']
     #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
-    enhancedImg = enhance_contrast(img)
-    grayImg: np.ndarray = to_grayscale(enhancedImg)
+    if enhance:
+        enhancedImg = enhance_contrast(img)
+        images.append(enhancedImg)
+        captions.append('Enhanced contrast')
+        grayImg: np.ndarray = to_grayscale(enhancedImg)
+    else:
+        grayImg: np.ndarray = to_grayscale(img)
+    images.append(grayImg)
+    captions.append('Grayscale image') 
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
+    images.append(blurredImg)
+    captions.append('Blurred image')
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
+    images.append(CannyImg)
+    captions.append('Canny filter')
     deImg: np.ndarray = dilate_and_erode(CannyImg, kernel)
+    images.append(deImg)
+    captions.append('Dilated and eroded image')
     allContours: tuple[tuple[np.ndarray], np.ndarray]  = get_all_contours(img, deImg)
     contoursImg: np.ndarray = allContours[1]
     allContours: tuple[np.ndarray] = allContours[0]
+    images.append(contoursImg)
+    captions.append('All contours')
     topContours: tuple[np.ndarray, np.ndarray] = get_top_contours(img, allContours, num_corners)
     imgContours: np.ndarray = topContours[1]
     topContours: np.ndarray = topContours[0]
+    images.append(imgContours)
+    captions.append('Top contours')
     pts1: np.ndarray = reorder(topContours)
     try:
         transformedImages: list[np.ndarray] = [transform_with_ratio(img, p) for p in pts1]
     except:
         st.warning(f'Something is wrong with image transformation function')
     if verbose:
-        images = [
-            img,
-            enhancedImg,
-            grayImg, 
-            blurredImg, 
-            CannyImg, 
-            deImg,
-            contoursImg, 
-            imgContours
-        ]
-        captions = [
-            'Original image', 
-            'Original image with enhanced contrast', 
-            'Gray image', 
-            'Blurred image', 
-            'Canny filter', 
-            'Dilated and eroded image', 
-            'All contours', 
-            'Top contours', 
-            #'Clipped and transformed image'
-        ]
         st.image(images, caption=captions)
     try:
         st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
@@ -270,9 +269,10 @@ threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
 num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
 num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
 verbose: bool = st.checkbox('Verbose', True)
+enhance: bool = st.checkbox('Enhance contrast', True)
 kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
 #st.info(num_corners)
-documents: list[np.ndarray] = get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
+documents: list[np.ndarray] = get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose, enhance)
 
 #if documents is not None:
 #    st.download_button(
