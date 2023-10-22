@@ -8,8 +8,8 @@ import time
 st.set_page_config(page_title='Document scanner demo', page_icon=':document:')
 
 
-width: int = 512
-height: int = 512
+#width: int = 512
+#height: int = 512
 file = None
 
 def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.ndarray:
@@ -271,3 +271,4 @@ else:
     kernel: np.ndarray = np.ones(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)]))
     st.info(num_corners)
     get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
+st.balloons()
