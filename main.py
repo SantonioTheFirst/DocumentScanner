@@ -28,7 +28,7 @@ def enhance_contrast(img:np.ndarray) -> np.ndarray:
     cl = clahe.apply(l_channel)
 
     # merge the CLAHE enhanced L-channel with the a and b channel
-    limg = cv2.merge((cl,a,b))
+    limg = cv2.merge((cl, a, b))
 
     # Converting image from LAB Color model to BGR color spcae
     enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
@@ -75,7 +75,7 @@ def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[n
     return contours, allContours
     
     
-def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int] = set([4])) -> tuple[np.ndarray, np.ndarray]:
     top_contours: list[np.ndarray] = []
     imgContours: np.ndarray = img.copy()
     contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 25.0
@@ -88,7 +88,7 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray) -> tuple[np.ndarray,
             peri = cv2.arcLength(contour, True)
             approx: np.ndarray = cv2.approxPolyDP(contour, 0.02 * peri, True)
             # print(len(approx))
-            if len(approx) in set([4, 5, 6, 7]):
+            if len(approx) in num_corners:
                 top_contours.append(approx)
     top_contours = np.array(top_contours)
     imgContours: np.ndarray = cv2.drawContours(imgContours, top_contours, -1, (0, 255, 0), 10)
@@ -189,7 +189,7 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     return result
     
     
-def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, verbose: bool = True) -> np.ndarray:
+def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, num_corners: set[int] = set([4]), verbose: bool = True) -> np.ndarray:
     #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
     enhancedImg = enhance_contrast(img)
@@ -200,16 +200,20 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
     allContours: tuple[tuple[np.ndarray], np.ndarray]  = get_all_contours(img, deImg)
     contoursImg: np.ndarray = allContours[1]
     allContours: tuple[np.ndarray] = allContours[0]
-    topContours: tuple[np.ndarray, np.ndarray] = get_top_contours(img, allContours)
+    topContours: tuple[np.ndarray, np.ndarray] = get_top_contours(img, allContours, num_corners)
     imgContours: np.ndarray = topContours[1]
     topContours: np.ndarray = topContours[0]
     #try:
        # st.warning(reorder(list(topContours.values())))
     pts1: np.ndarray = reorder(topContours)
-    transformedImages: list[np.ndarray] = [transform_with_ratio(img, p) for p in pts1]
+    try:
+        transformedImages: list[np.ndarray] = [transform_with_ratio(img, p) for p in pts1]
+    except E:
+        st.warning(f'Something is wrong with image transformation function: {E}')
     if verbose:
         images = [
             #imgBorder,
+            enhancedImg,
             grayImg, 
             blurredImg, 
             CannyImg, 
@@ -218,7 +222,7 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
             imgContours
         ]
         captions = [
-            #'Original image with border', 
+            'Original image with enhanced contrast', 
             'Gray image', 
             'Blurred image', 
             'Canny filter', 
@@ -228,8 +232,8 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
             #'Clipped and transformed image'
         ]
         st.image(images, caption=captions)
-        st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
-    return transformedImages
+        try:
+            st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
     #except:
         #st.info('Cannot process this image, change your thresholds.') 
 
@@ -248,4 +252,5 @@ if file:
     img = cv2.cvtColor(cv2.imdecode(file_bytes, 1), cv2.COLOR_BGR2RGB)
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
-    get_clipped_img(img, threshold1, threshold2)
+    corners_range: set[int] = set(range(st.slider('Number of corners', 4, 8, (4, 5))))
+    get_clipped_img(img, threshold1, threshold2, num_corners)
