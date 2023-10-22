@@ -234,6 +234,9 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
         st.image(images, caption=captions)
         try:
             st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
+        except:
+            pass
+            #st.warning('')
     #except:
         #st.info('Cannot process this image, change your thresholds.') 
 
