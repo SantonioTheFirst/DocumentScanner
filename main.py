@@ -189,14 +189,14 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     return result
     
     
-def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, num_corners: set[int] = set([4]), verbose: bool = True) -> np.ndarray:
+def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100, kernel, num_corners: set[int] = set([4]), verbose: bool = True) -> np.ndarray:
     #imgBorder = add_border(img)
     #resizedImg: np.ndarray = resize(img, width, height)
     enhancedImg = enhance_contrast(img)
     grayImg: np.ndarray = to_grayscale(enhancedImg)
     blurredImg: np.ndarray = add_gaussian_blur(grayImg)
     CannyImg: np.ndarray = apply_Canny_filter(blurredImg, threshold1, threshold2)
-    deImg: np.ndarray = dilate_and_erode(CannyImg)
+    deImg: np.ndarray = dilate_and_erode(CannyImg, kernel)
     allContours: tuple[tuple[np.ndarray], np.ndarray]  = get_all_contours(img, deImg)
     contoursImg: np.ndarray = allContours[1]
     allContours: tuple[np.ndarray] = allContours[0]
@@ -259,5 +259,6 @@ if file:
     num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
     num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
     verbose: bool = st.checkbox('Verbose', True)
+    kernel: np.ndarray = np.ones(eval(st.selectbox('Dilate and eroded kernel size', [(3, 3), (5, 5), (7, 7)])))
     st.info(num_corners)
-    get_clipped_img(img, threshold1, threshold2, num_corners, verbose)
+    get_clipped_img(img, threshold1, threshold2, kernel, num_corners, verbose)
