@@ -17,7 +17,7 @@ def add_border(img: np.ndarray, border_size: int = 50, value: int = 255) -> np.n
     value = [value for i in range(3)]
     return cv2.copyMakeBorder(img, *border, cv2.BORDER_CONSTANT, value=value)
 
-
+@st.cache_data
 def enhance_contrast(img:np.ndarray) -> np.ndarray:
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l_channel, a, b = cv2.split(lab)
@@ -39,17 +39,20 @@ def resize(img: np.ndarray, width: int, height: int) -> np.ndarray:
     img: np.ndarray = cv2.resize(img, (width, height))
     return img
     
-    
+
+@st.cache_data
 def to_grayscale(img: np.ndarray) -> np.ndarray:
     img: np.ndarray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
     
-    
+
+@st.cache_data
 def add_gaussian_blur(img: np.ndarray) -> np.ndarray:
     img: np.ndarray = cv2.GaussianBlur(img, (5, 5), 1)
     return img
     
-    
+
+@st.cache_data
 def apply_Canny_filter(img: np.ndarray, threshold1: int = 50, threshold2: int = 255, aperture_size: int = 3) -> np.ndarray:
     img: np.ndarray = cv2.Canny(
         image=img,
@@ -60,13 +63,15 @@ def apply_Canny_filter(img: np.ndarray, threshold1: int = 50, threshold2: int = 
     )
     return img
     
-    
+
+@st.cache_data
 def dilate_and_erode(img: np.ndarray, kernel: np.ndarray = np.ones((3, 3)), d_iter: int = 1, e_iter: int = 1) -> np.ndarray:
     imgDial: np.ndarray = cv2.dilate(img, kernel, iterations=d_iter)
     imgThreshold: np.ndarray = cv2.erode(imgDial, kernel, iterations=e_iter)
     return imgThreshold
     
-    
+
+@st.cache_data
 def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[np.ndarray], np.ndarray]:
     imgContours: np.ndarray = img.copy()
     contours: tuple[np.ndarray, None] = cv2.findContours(imgThreshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -74,7 +79,8 @@ def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[n
     allContours: np.ndarray = cv2.drawContours(imgContours, contours, -1, (0, 255, 0), 10)
     return contours, allContours
     
-    
+
+@st.cache_data
 def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int] = set([4])) -> tuple[np.ndarray, np.ndarray]:
     top_contours: list[np.ndarray] = []
     imgContours: np.ndarray = img.copy()
@@ -94,7 +100,8 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int
     imgContours: np.ndarray = cv2.drawContours(imgContours, top_contours, -1, (0, 255, 0), 10)
     return top_contours, imgContours
     
-    
+
+@st.cache_data
 def reorder(myPoints: list) -> np.ndarray:
     result: list[np.ndarray] = []
     for points in myPoints:
@@ -111,6 +118,7 @@ def reorder(myPoints: list) -> np.ndarray:
     return np.array(result, dtype=np.float32)
     
 
+@st.cache_data
 def transform_with_ratio(img: np.ndarray, pts: np.ndarray) -> np.ndarray:
     (rows,cols,_) = img.shape
 
@@ -188,7 +196,8 @@ def transform(img: np.ndarray, pts1: np.ndarray, pts2: np.ndarray) -> np.ndarray
     result: np.ndarray = cv2.warpPerspective(img, matrix, (width, height))
     return result
     
-    
+
+@st.cache_data
 def get_clipped_img(
     img: np.ndarray,
     threshold1: int = 50,
