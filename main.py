@@ -233,10 +233,10 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
             #'Clipped and transformed image'
         ]
         st.image(images, caption=captions)
-        try:
-            st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
-        except:
-            pass
+    try:
+        st.image(transformedImages, caption=[f'Document_{i}' for i in range(len(transformedImages))])
+    except:
+        pass
             #st.warning('')
     #except:
         #st.info('Cannot process this image, change your thresholds.') 
@@ -258,5 +258,6 @@ if file:
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
     num_corners: tuple[int, int] = st.slider('Number of corners', 4, 8, (4, 5))
     num_corners: set[int] = set(list(range(num_corners[0], num_corners[1] + 1)))
+    verbose: bool = st.checkbox('Verbose', True)
     st.info(num_corners)
-    get_clipped_img(img, threshold1, threshold2, num_corners)
+    get_clipped_img(img, threshold1, threshold2, num_corners, verbose)
