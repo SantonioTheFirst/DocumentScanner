@@ -78,7 +78,7 @@ def get_all_contours(img: np.ndarray, imgThreshold: np.ndarray) -> tuple[tuple[n
 def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int] = set([4])) -> tuple[np.ndarray, np.ndarray]:
     top_contours: list[np.ndarray] = []
     imgContours: np.ndarray = img.copy()
-    contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 25.0
+    contour_area_threshold: float = (img.shape[0] * img.shape[1]) / 30.0
     st.info(contour_area_threshold)
     # print(contours.shape)
     for contour in contours:
@@ -87,7 +87,7 @@ def get_top_contours(img: np.ndarray, contours: np.ndarray, num_corners: set[int
         if area > contour_area_threshold:
             peri = cv2.arcLength(contour, True)
             approx: np.ndarray = cv2.approxPolyDP(contour, 0.02 * peri, True)
-            # print(len(approx))
+            st.info(f'Len: {len(approx)}')
             if len(approx) in num_corners:
                 top_contours.append(approx)
     top_contours = np.array(top_contours)
@@ -212,7 +212,7 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
         st.warning(f'Something is wrong with image transformation function: {E}')
     if verbose:
         images = [
-            #imgBorder,
+            img,
             enhancedImg,
             grayImg, 
             blurredImg, 
@@ -222,6 +222,7 @@ def get_clipped_img(img: np.ndarray, threshold1: int = 50, threshold2: int = 100
             imgContours
         ]
         captions = [
+            'Original image', 
             'Original image with enhanced contrast', 
             'Gray image', 
             'Blurred image', 
@@ -256,4 +257,5 @@ if file:
     threshold1: int = st.slider('Threshold 1', 0, 255, 50, disabled=False)
     threshold2: int = st.slider('Threshold 2', 0, 255, 255, disabled=False)
     num_corners: set[int] = set(range(*st.slider('Number of corners', 4, 8, (4, 5))))
+    st.info(num_corners)
     get_clipped_img(img, threshold1, threshold2, num_corners)
